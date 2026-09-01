@@ -1,0 +1,37 @@
+[project]
+name = "mcp-oidc-proxy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.16.5",
+    "ty>=0.0.77",
+]
+
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+pythonpath = ["tests"]
+addopts = ["--cov=src", "--cov-report=html", "--cov-report=json:.coverage.json"]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = [".scratch/*"]
+
+[tool.coverage.report]
+fail_under = 95
+skip_empty = true
+
+[tool.ruff]
+exclude = [".scratch/*"]
+
+[tool.ruff.format]
+exclude = [".scratch/*"]
