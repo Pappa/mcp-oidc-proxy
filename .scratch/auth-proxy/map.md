@@ -20,10 +20,11 @@ A runnable prototype in this repo: two distinct Python applications packaged wit
 - [What must the demo OIDC provider expose for FastMCP OIDCProxy?](issues/01-research-fastmcp-oidc-proxy-idp-requirements.md): minimal IdP needs discovery + authorize + token + JWKS (RS256); pre-registered client with redirect `{mcp_base_url}/auth/callback`; no DCR — FastMCP handles MCP-facing OAuth
 - [Which Python stack should implement the demo OIDC provider?](issues/02-research-python-demo-oidc-server-options.md): NanoIDP thin uv app (YAML config + launcher); auth on port 9000, MCP on 8000; Authlib + Flask is runner-up
 - [How should the two uv apps be laid out and run locally?](issues/03-grilling-repo-layout-and-dev-workflow.md): uv workspace (`apps/auth-server`, `apps/mcp-server`); `127.0.0.1:9000`/`8000`; root `.env.example`; committed nanoidp config; README + `uv run start`
+- [How do we verify the OIDC proxy works end-to-end?](issues/04-grilling-verification-and-success-criteria.md): `tests/smoke/` with `@pytest.mark.smoke`; unit tests via `uv run pytest`, smoke via `uv run pytest -m smoke`; HeadlessOAuth E2E against subprocess servers
 
 ## Not yet specified
 
-- Smoke-test harness details (pytest? subprocess? which MCP client library?)
+<!-- Map complete — ready for implementation handoff -->
 
 ## Out of scope
 
