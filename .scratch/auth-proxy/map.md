@@ -18,12 +18,11 @@ A runnable prototype in this repo: two distinct Python applications packaged wit
 
 - [Initial charting decisions](issues/05-charting-initial-decisions.md): uv workspace monorepo; automated local smoke tests launching both servers; single `hello_world` MCP tool
 - [What must the demo OIDC provider expose for FastMCP OIDCProxy?](issues/01-research-fastmcp-oidc-proxy-idp-requirements.md): minimal IdP needs discovery + authorize + token + JWKS (RS256); pre-registered client with redirect `{mcp_base_url}/auth/callback`; no DCR — FastMCP handles MCP-facing OAuth
+- [Which Python stack should implement the demo OIDC provider?](issues/02-research-python-demo-oidc-server-options.md): NanoIDP thin uv app (YAML config + launcher); auth on port 9000, MCP on 8000; Authlib + Flask is runner-up
 
 ## Not yet specified
 
-- Which Python stack implements the demo OIDC provider (ticket 02)
 - Exact workspace directory names and root `pyproject.toml` layout
-- Auth server port vs MCP server port (MCP default redirect assumes `http://localhost:8000/auth/callback`)
 - Environment variable / secrets layout shared between apps (client_id, client_secret, issuer URLs)
 - Smoke-test harness details (pytest? subprocess? which MCP client library?)
 

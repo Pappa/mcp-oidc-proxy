@@ -144,7 +144,50 @@ Authlib documents the OIDC code-flow extension pattern ([Flask OIDC Provider](ht
 
 ---
 
-### 7. Other lightweight mock IdPs (not Python-native)
+### 7. NanoIDP (Python package)
+
+**What it is:** A lightweight, purpose-built Python identity provider for **development and testing** — not production ([GitHub](https://github.com/cdelmonte-zg/nanoidp), [PyPI](https://pypi.org/project/nanoidp/)). Install with `pip install nanoidp`; configure via YAML files (users, OAuth clients, settings); no database.
+
+**OIDC surface (built-in):**
+
+| Endpoint | Path |
+|---|---|
+| OIDC Discovery | `GET /.well-known/openid-configuration` |
+| JWKS | `GET /.well-known/jwks.json` |
+| Authorize | `GET /authorize` (login page) |
+| Token | `POST /token` |
+| UserInfo | `GET/POST /userinfo` |
+
+Also ships introspection, revocation, device flow, refresh tokens, and PKCE (S256). Tokens use **RS256** ([README security section](https://github.com/cdelmonte-zg/nanoidp/blob/main/README.md)).
+
+**Client configuration:** Pre-registered clients in `config/settings.yaml` with `client_id`, `client_secret`, and optional scopes/audiences ([README settings example](https://github.com/cdelmonte-zg/nanoidp/blob/main/README.md)). Redirect URIs are managed via the web UI or YAML (dev profile is permissive). Token endpoint auth uses standard `client_secret_basic` (documented in curl examples).
+
+**Run:**
+
+```bash
+pip install nanoidp
+python -m nanoidp init ./config
+python -m nanoidp --config ./config --port 9000   # avoid default 8000 (MCP port)
+```
+
+**As a distinct uv app:** The auth-server workspace member can be a thin wrapper — `pyproject.toml` depending on `nanoidp`, checked-in `config/` (users, settings, keys), and a launcher script or `[project.scripts]` entry that calls `python -m nanoidp`. No custom AS code required.
+
+**Complexity:** **Lowest** for a Python-native IdP. No Flask/Django scaffolding, no discovery/JWKS routes to add, no RS256 migration from example code.
+
+**Maintenance:** Younger project (MIT, Python ≥3.10, active through 2026). Pin `nanoidp` in `pyproject.toml`; upstream owns OIDC correctness. Trade-off: smaller community and shorter track record than Authlib.
+
+**Fit:** **Excellent** for a demo-only IdP whose sole job is exercising `OIDCProxy`. Matches the map's scope better than building an AS from scratch. The "two distinct apps" requirement is satisfied by a configured nanoidp app alongside the FastMCP app, not by writing AS logic.
+
+**Caveats:**
+
+- Default port `8000` conflicts with FastMCP's typical MCP port — run nanoidp on `9000` (or MCP on another port).
+- Issuer and `oauth.issuer` in settings must match the chosen base URL (e.g. `http://127.0.0.1:9000`).
+- Dev profile allows permissive redirects and plaintext passwords — appropriate for this prototype, not production ([README security notes](https://github.com/cdelmonte-zg/nanoidp/blob/main/README.md)).
+- Bundled SAML and MCP-server features are out of scope for this effort but harmless.
+
+---
+
+### 8. Other lightweight mock IdPs (not Python-native)
 
 | Tool | Runtime | Pros | Cons | Source |
 |---|---|---|---|---|
@@ -161,7 +204,8 @@ Authlib documents the OIDC code-flow extension pattern ([Flask OIDC Provider](ht
 
 | Option | Python / uv native | Initial effort | Ongoing maintenance | OIDC discovery + JWKS | Pre-registered client | FastMCP fit | Demo UX (login UI) |
 |---|---|---|---|---|---|---|---|
-| **Authlib + Flask (recommended)** | Yes | Low–medium | Low (pin deps) | Add routes (~30 LOC); RS256 | Web UI or seed script | **Best** | Built-in in examples |
+| **NanoIDP (recommended)** | Yes | **Lowest** | Low (pin dep + YAML) | **Built-in** | YAML / web UI | **Best** | Built-in web UI |
+| Authlib + Flask | Yes | Low–medium | Low (pin deps) | Add routes (~30 LOC); RS256 | Web UI or seed script | Good | Built-in in examples |
 | Authlib + Django | Yes | Medium–high | Medium | Manual (same as Flask) | Custom | Good | Build yourself |
 | django-oauth-toolkit | Yes | Medium | Medium (Django) | **Built-in** | Django admin | Good | Django admin |
 | OAuthLib raw | Yes | **High** | **High (you own it)** | Build yourself | Build yourself | Possible | Build yourself |
@@ -173,50 +217,86 @@ Authlib documents the OIDC code-flow extension pattern ([Flask OIDC Provider](ht
 
 ## Recommendation
 
-### Default choice: **Authlib + Flask**, adapted from [`authlib/example-oidc-server`](https://github.com/authlib/example-oidc-server)
+### Default choice: **NanoIDP** as a thin uv workspace app
 
 **Rationale:**
 
-1. **Matches repo intent.** The map explicitly calls for a Python demo OIDC app packaged with uv — not a Docker sidecar ([map](../map.md)).
-2. **Smallest credible Python OIDC AS.** The official OIDC example already implements authorization code + `id_token` issuance with SQLAlchemy persistence and a browser login/registration flow. That is exactly the upstream surface `OIDCProxy` consumes.
-3. **FastMCP alignment.** `OIDCProxy` discovers `jwks_uri` and validates JWTs — RS256 + a JWKS route is the straightforward path (preferred over the example's HS256 dummy config). If access tokens remain opaque, set `verify_id_token=True` on the MCP server ([FastMCP PR #3248](https://github.com/PrefectHQ/fastmcp/pull/3248)).
-4. **Low maintenance.** Pin `authlib`, `flask`, `flask-sqlalchemy` in the demo app's `pyproject.toml`; no JVM, no Node, no Django admin surface.
-5. **Proven local-dev pattern.** `AUTHLIB_INSECURE_TRANSPORT=1` + SQLite is documented in Authlib's own examples.
+1. **Purpose-built for this exact scope.** NanoIDP is explicitly a dev/test IdP — "throw away when the test is done" ([PyPI description](https://pypi.org/project/nanoidp/)). The auth-proxy map defines the auth server as demo-only to validate `OIDCProxy`; nanoidp matches that intent better than forking example AS code.
+2. **All FastMCP requirements out of the box.** Discovery, JWKS (`/.well-known/jwks.json`), authorize, token, RS256 JWTs, PKCE, and `client_secret_basic` are implemented and documented ([GitHub README endpoints](https://github.com/cdelmonte-zg/nanoidp/blob/main/README.md)). No ~30 LOC of discovery/JWKS wiring or HS256→RS256 migration.
+3. **Lowest path to a working prototype.** A uv app with `nanoidp` as a dependency, checked-in YAML config, and a one-line launcher gets to E2E faster than maintaining a fork of `authlib/example-oidc-server`.
+4. **Still two distinct Python apps.** `apps/auth-server/` owns config, launcher, and `pyproject.toml`; `apps/mcp-server/` owns FastMCP + `OIDCProxy`. The auth app is configured, not empty — but it does not reimplement OIDC.
+5. **Smoke-test friendly.** `python -m nanoidp --config ./config --port 9000` is easy to spawn as a subprocess alongside the MCP server.
 
 **Concrete implementation sketch:**
 
 ```
-demo-oidc/                    # uv app (sibling to mcp-server app)
-  pyproject.toml              # authlib, flask, flask-sqlalchemy
-  app/
-    oauth2.py                 # from example-oidc-server + RS256 key
-    routes.py                 # + /.well-known/openid-configuration, /oauth/jwks
-    models.py                 # SQLite User, OAuth2Client, codes, tokens
-  keys/rsa.pem                # dev-only; gitignored
+apps/
+  auth-server/
+    pyproject.toml              # depends on nanoidp
+    config/
+      settings.yaml             # issuer, port 9000, OAuth client for MCP proxy
+      users.yaml                # demo user (e.g. admin/admin)
+    README.md                   # how to init keys / run locally
+  mcp-server/
+    pyproject.toml              # depends on fastmcp
+    ...
 ```
 
-**Seed data for local dev:**
+**Seed data for local dev (`config/settings.yaml`):**
 
-- One `OAuth2Client` with `grant_types: [authorization_code]`, scopes `openid profile`, `token_endpoint_auth_method: client_secret_basic`, redirect URI `http://localhost:{MCP_PORT}/auth/callback`.
-- Export `CLIENT_ID` / `CLIENT_SECRET` to the MCP app's env.
-- Issuer and discovery URLs should use a single configurable base (e.g. `http://127.0.0.1:9000`).
+```yaml
+server:
+  host: "127.0.0.1"
+  port: 9000
+
+oauth:
+  issuer: "http://127.0.0.1:9000"
+  clients:
+    - client_id: "mcp-proxy-client"
+      client_secret: "dev-secret"
+      description: "FastMCP OIDCProxy upstream client"
+      # redirect URI for MCP base_url — configure via web UI or client YAML
+```
+
+- Export `client_id` / `client_secret` to the MCP app's env.
+- Register redirect URI `http://127.0.0.1:8000/auth/callback` for the MCP proxy client.
+- MCP `OIDCProxy` `config_url`: `http://127.0.0.1:9000/.well-known/openid-configuration`
 
 **Run:**
 
 ```bash
-export AUTHLIB_INSECURE_TRANSPORT=1
-uv run flask --app app run --port 9000
+cd apps/auth-server
+uv run python -m nanoidp init ./config   # first time only
+uv run python -m nanoidp --config ./config
 ```
 
-### Runner-up: **django-oauth-toolkit**
+### Runner-up: **Authlib + Flask**, adapted from [`authlib/example-oidc-server`](https://github.com/authlib/example-oidc-server)
 
-Choose DOT when the team values **built-in discovery/JWKS/admin** over minimal footprint. Trade-off: pulling Django into a repo whose other app is FastMCP (not Django) increases total complexity for little gain in a demo-only IdP.
+Choose Authlib + Flask when you need **full control over AS code** (custom claims, unusual token shapes, debugging inside the authorization server) or prefer anchoring on Authlib — the same JWT ecosystem FastMCP uses — over a younger standalone IdP package.
+
+Trade-offs vs nanoidp: more initial code (discovery/JWKS routes, RS256 keys, SQLAlchemy models), `AUTHLIB_INSECURE_TRANSPORT=1` for HTTP localhost, but a well-trodden library and no third-party IdP release cadence to track.
+
+**Sketch (unchanged from prior research):**
+
+```
+apps/auth-server/
+  pyproject.toml              # authlib, flask, flask-sqlalchemy
+  app/
+    oauth2.py                 # from example-oidc-server + RS256 key
+    routes.py                 # + /.well-known/openid-configuration, /oauth/jwks
+    models.py
+  keys/rsa.pem                # dev-only; gitignored
+```
+
+### Third choice: **django-oauth-toolkit**
+
+Choose DOT when built-in discovery/JWKS/admin outweigh framework weight. Poor fit for a lightweight sibling to FastMCP unless the team already runs Django.
 
 ### Explicit non-choices
 
 - **OAuthLib alone** — too much bespoke AS code.
-- **Starlette/FastAPI AS** — no Authlib server integration; unnecessary given Flask example.
-- **Keycloak / mock IdPs as default** — fine for CI or temporary MCP development, but they fail the "Python demo provider" requirement and add non-uv runtime dependencies.
+- **Starlette/FastAPI AS** — no Authlib server integration; unnecessary given nanoidp or Flask example.
+- **Keycloak / non-Python mock IdPs as default** — fail the Python-native demo-provider requirement or add non-uv runtime dependencies.
 
 ---
 
@@ -260,4 +340,6 @@ Sources: [FastMCP OIDC Proxy](https://gofastmcp.com/servers/auth/oidc-proxy), [v
 - [mocc — minimal OIDC mock](https://github.com/jonasbg/mocc)
 - [dev-oidc](https://github.com/camcima/dev-oidc)
 - [stubidp](https://github.com/cerberauth/stubidp)
+- [NanoIDP GitHub](https://github.com/cdelmonte-zg/nanoidp)
+- [NanoIDP PyPI](https://pypi.org/project/nanoidp/)
 - [Stack Overflow — Authlib `.well-known` setup](https://stackoverflow.com/questions/61022475/any-examples-of-setting-up-well-known-url-using-authlib)
