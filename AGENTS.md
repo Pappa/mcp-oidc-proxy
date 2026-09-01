@@ -31,6 +31,7 @@ Pytest:
 
 ```bash
 uv run pytest
+uv run pytest -m smoke
 ```
 
 ty:

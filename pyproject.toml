@@ -5,7 +5,9 @@ description = "Local demo OIDC provider and FastMCP OIDC proxy prototype"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "fastmcp>=4.0.0",
     "nanoidp>=2.8.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.scripts]
@@ -14,6 +16,7 @@ launch-mcp = "mcp_oidc_proxy.launch_mcp:main"
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "pytest-mock>=3.15.1",
     "ruff>=0.16.5",
@@ -30,6 +33,7 @@ packages = ["src/mcp_oidc_proxy"]
 [tool.pytest.ini_options]
 testpaths = "tests"
 pythonpath = ["tests", "src"]
+asyncio_mode = "auto"
 addopts = [
     "-m",
     "not smoke",
