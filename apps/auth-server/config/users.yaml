@@ -1,0 +1,18 @@
+# Demo users for local OAuth login flows. Demo-only credentials.
+
+config_version: 1
+
+users:
+  admin:
+    password: "admin"
+    description: "Demo administrator"
+    email: "admin@example.org"
+    identity_class: "INTERNAL"
+    roles:
+      - "USER"
+      - "ADMIN"
+    groups:
+      - "ADMINISTRATORS"
+    tenant: "default"
+
+default_user: "admin"

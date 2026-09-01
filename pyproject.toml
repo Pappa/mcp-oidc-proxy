@@ -1,13 +1,17 @@
 [project]
 name = "mcp-oidc-proxy"
 version = "0.1.0"
-description = "Add your description here"
+description = "Local demo OIDC provider and FastMCP OIDC proxy prototype"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
 
+[tool.uv.workspace]
+members = ["apps/auth-server"]
+
 [dependency-groups]
 dev = [
+    "auth-server",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pytest-mock>=3.15.1",
@@ -15,15 +19,27 @@ dev = [
     "ty>=0.0.77",
 ]
 
+[tool.uv.sources]
+auth-server = { workspace = true }
 
 [tool.pytest.ini_options]
 testpaths = "tests"
-pythonpath = ["tests"]
-addopts = ["--cov=src", "--cov-report=html", "--cov-report=json:.coverage.json"]
+pythonpath = ["tests", "apps/auth-server/src"]
+addopts = [
+    "-m",
+    "not smoke",
+    "--cov=auth_server",
+    "--cov-report=html",
+    "--cov-report=json:.coverage.json",
+]
+markers = [
+    "smoke: end-to-end smoke tests that spawn real server subprocesses",
+    "integration: integration tests that spawn the auth server subprocess",
+]
 
 [tool.coverage.run]
 branch = true
-source = ["src"]
+source = ["apps/auth-server/src/auth_server"]
 omit = [".scratch/*"]
 
 [tool.coverage.report]

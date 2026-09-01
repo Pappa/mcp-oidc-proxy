@@ -1,0 +1,33 @@
+# NanoIDP demo settings for local MCP OIDC proxy development.
+# Demo-only: do not use in production.
+
+config_version: 1
+
+server:
+  host: "127.0.0.1"
+  port: 9000
+
+oauth:
+  issuer: "http://127.0.0.1:9000"
+  audience: "mcp-oidc-proxy"
+  token_expiry_minutes: 60
+  clients:
+    - client_id: "${DEMO_OIDC_CLIENT_ID:mcp-proxy-client}"
+      client_secret: "${DEMO_OIDC_CLIENT_SECRET:dev-secret}"
+      description: "FastMCP OIDCProxy upstream client"
+      redirect_uris:
+        - "http://127.0.0.1:8000/auth/callback"
+
+jwt:
+  keys_dir: "./keys"
+
+saml:
+  default_acs_url: "http://127.0.0.1:8080/login/saml2/sso/nanoidp"
+  export_roles: false
+  export_groups: false
+
+authority_prefixes:
+  roles: "ROLE_"
+  groups: "GROUP_"
+  identity_class: "IDENTITY_"
+  entitlements: "ENT_"
