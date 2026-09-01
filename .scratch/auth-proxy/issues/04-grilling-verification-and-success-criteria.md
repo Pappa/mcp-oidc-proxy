@@ -12,4 +12,6 @@ Define concrete success criteria and the verification workflow: which MCP client
 
 **Constraints from** [Python OIDC server research](02-research-python-demo-oidc-server-options.md): smoke tests must launch both servers (NanoIDP auth app + FastMCP MCP server) as subprocesses.
 
+**Constraints from** [repo layout decision](03-grilling-repo-layout-and-dev-workflow.md): use root `.env.example` vars; servers at `127.0.0.1:9000` and `127.0.0.1:8000`; smoke tests may reuse the same env layout as `uv run start`.
+
 Remaining: test harness choice, MCP client library, concrete pass/fail criteria.
