@@ -21,7 +21,7 @@ A runnable prototype in this repo: two distinct Python applications packaged wit
 - [Which Python stack should implement the demo OIDC provider?](issues/02-research-python-demo-oidc-server-options.md): NanoIDP thin uv app (YAML config + launcher); auth on port 9000, MCP on 8000; Authlib + Flask is runner-up
 - [How should the two uv apps be laid out and run locally?](issues/03-grilling-repo-layout-and-dev-workflow.md): uv workspace (`apps/auth-server`, `apps/mcp-server`); `127.0.0.1:9000`/`8000`; root `.env.example`; committed nanoidp config; README + `uv run start`
 - [How do we verify the OIDC proxy works end-to-end?](issues/04-grilling-verification-and-success-criteria.md): `tests/smoke/` with `@pytest.mark.smoke`; unit tests via `uv run pytest`, smoke via `uv run pytest -m smoke`; HeadlessOAuth E2E against subprocess servers
-- [Bootstrap uv workspace and runnable demo OIDC auth server](issues/06-bootstrap-uv-workspace-and-auth-server.md): uv workspace with `apps/auth-server`; NanoIDP on `127.0.0.1:9000`; committed demo config and RSA keys; `.env.example`; pytest smoke marker exclusion
+- [Bootstrap uv workspace and runnable demo OIDC auth server](issues/06-bootstrap-uv-workspace-and-auth-server.md): committed `./config/` for NanoIDP; `uv run python -m nanoidp` on `127.0.0.1:9000`; `.env.example`; pytest smoke marker exclusion
 
 ## Not yet specified
 

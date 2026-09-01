@@ -40,7 +40,7 @@ def _wait_until_healthy(url: str, timeout_seconds: float) -> None:
 @pytest.fixture(scope="module")
 def auth_server() -> Iterator[str]:
     process = subprocess.Popen(
-        ["uv", "run", "--package", "auth-server", "auth-server"],
+        ["uv", "run", "python", "-m", "nanoidp"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )

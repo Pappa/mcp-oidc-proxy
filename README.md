@@ -13,17 +13,21 @@ Local prototype for exercising [FastMCP `OIDCProxy`](https://gofastmcp.com/serve
 uv sync
 ```
 
-No `.env` file is required for the auth server — demo client credentials are committed in NanoIDP config with defaults matching `.env.example`. Copy `.env.example` to `.env` when you add the MCP server (issue 07).
+Demo client credentials are committed in `config/` with defaults matching `.env.example`. Copy `.env.example` to `.env` when you run the MCP server.
 
-## Auth server (demo OIDC provider)
+## Running locally
 
-The auth server is a thin launcher around [NanoIDP](https://github.com/cdelmonte-zg/nanoidp) with committed demo configuration. It is for local development and testing only — not a production identity provider.
+Run each server in its own terminal from the repository root:
 
 ```bash
-uv run --package auth-server auth-server
+uv run python -m nanoidp
 ```
 
-The server listens on `http://127.0.0.1:9000` and exposes standard OIDC discovery, JWKS, authorize, and token endpoints.
+```bash
+uv run launch-mcp
+```
+
+The auth server listens on `http://127.0.0.1:9000` and exposes standard OIDC discovery, JWKS, authorize, and token endpoints. [NanoIDP](https://github.com/cdelmonte-zg/nanoidp) reads committed configuration from `./config`. It is for local development and testing only — not a production identity provider.
 
 Demo credentials:
 

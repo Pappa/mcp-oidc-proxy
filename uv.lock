@@ -2,12 +2,6 @@ version = 1
 revision = 3
 requires-python = ">=3.14"
 
-[manifest]
-members = [
-    "auth-server",
-    "mcp-oidc-proxy",
-]
-
 [[package]]
 name = "annotated-types"
 version = "0.8.0"
@@ -37,17 +31,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/9a/8e/82a0fe20a541c0314
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl", hash = "sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309", size = 67548, upload-time = "2026-03-19T14:22:23.645Z" },
 ]
-
-[[package]]
-name = "auth-server"
-version = "0.1.0"
-source = { editable = "apps/auth-server" }
-dependencies = [
-    { name = "nanoidp" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "nanoidp", specifier = ">=2.8.0" }]
 
 [[package]]
 name = "bcrypt"
@@ -630,11 +613,13 @@ wheels = [
 [[package]]
 name = "mcp-oidc-proxy"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
+dependencies = [
+    { name = "nanoidp" },
+]
 
 [package.dev-dependencies]
 dev = [
-    { name = "auth-server" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-mock" },
@@ -643,10 +628,10 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "nanoidp", specifier = ">=2.8.0" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "auth-server", editable = "apps/auth-server" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
     { name = "pytest-mock", specifier = ">=3.15.1" },

@@ -16,4 +16,4 @@
 
 ## Answer
 
-Bootstrapped a uv workspace with `apps/auth-server` as the first member. The auth server is a thin launcher around NanoIDP with committed `config/settings.yaml`, `config/users.yaml`, and generated RSA keys under `config/keys/`. Start with `uv run --package auth-server auth-server`. Root `.env.example` documents shared variables; pytest excludes `@pytest.mark.smoke` by default and includes integration tests for OIDC discovery, JWKS, authorize, and token endpoints.
+Bootstrapped committed NanoIDP configuration at `./config/` (settings, users, RSA keys). Run the demo OIDC provider from the repo root with `uv run python -m nanoidp` on `127.0.0.1:9000`. Root `.env.example` documents shared variables; pytest excludes `@pytest.mark.smoke` by default and includes integration tests for OIDC discovery, JWKS, authorize, and token endpoints. No custom auth-server Python package — NanoIDP is invoked directly.

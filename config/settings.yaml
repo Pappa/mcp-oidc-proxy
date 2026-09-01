@@ -19,7 +19,7 @@ oauth:
         - "http://127.0.0.1:8000/auth/callback"
 
 jwt:
-  keys_dir: "./keys"
+  keys_dir: "./config/keys"
 
 saml:
   default_acs_url: "http://127.0.0.1:8080/login/saml2/sso/nanoidp"
